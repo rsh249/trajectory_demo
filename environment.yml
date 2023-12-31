@@ -1,0 +1,10 @@
+name: trajectory
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=4.1.0
+  - r-seurat=4.3.0
+  - bioconductor-slingshot
+  - bioconductor-tradeseq
