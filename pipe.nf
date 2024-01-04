@@ -2,6 +2,7 @@
 
 params.infile = "$baseDir/data/sample.fa"
 params.matrix = "$baseDir/data/GSE72857_umitab.txt"
+params.outSeurat = "tmp/tmp_seurat.rds" // within nextflow output folder
 
 
 //  set variables
@@ -11,26 +12,28 @@ matrix_file = file(params.matrix)
  * Run data download and setup script to convert gene count matrix to Seurat object
  */
 process data_setup {
+		tag { setup }
+
     input:
-    		file(infile)
+	    path "input"
+
     output:
-        file('*.rds')
-		
+    	path("tmp_seurat.rds")
+
     """
-    Rscript --vanilla '${workflow.projectDir}/R/00_setup.R' '${params.matrix}'
+    Rscript --vanilla '$baseDir/R/00_setup.R' $input
     """
 }
 
 
 process run_slingshot {
-    input:
-        file('infile')
-
+		input:
+				path("input")
     output:
-        file('*.rds')
+        path("test")
 		
     """
-    Rscript --vanilla '${workflow.projectDir}/R/01_slingshot.R'
+    Rscript --vanilla '$baseDir/R/01_slingshot.R' tmp_seurat.rds
     """
 }
 
@@ -39,5 +42,6 @@ process run_slingshot {
  * Define the workflow
  */
 workflow {
-    data_setup(params.matrix) | run_slingshot | view
+    data_setup(params.matrix) |
+    run_slingshot | view
 }

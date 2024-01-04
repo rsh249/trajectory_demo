@@ -3,9 +3,10 @@ library(glue)
 
 args <- commandArgs(trailingOnly = TRUE)
 infile=args[1]
+
 if(is.na(infile)){infile="data/GSE72857_umitab.txt"} ## keep for manual testing of this R script
 if(!dir.exists("tmp")){dir.create("tmp")}
-outSeurat="tmp/tmp_seurat.rds"
+outSeurat="tmp_seurat.rds"
 
 message(glue("Converting gene counts {infile} to matrix"))
 data <- read.delim(infile, header = T, row.names = 1)
@@ -22,7 +23,15 @@ data <- ScaleData(data)
 data <- RunPCA(data)
 data <- FindNeighbors(data,resolution = 1)
 data <- FindClusters(data)
-data <- RunUMAP(data, n.neighbors = 10, dims = 1:50, spread = 2, min.dist = 0.3)
+data <- RunUMAP(data, n.neighbors = 10, 
+								dims = 1:50, spread = 2, 
+								min.dist = 0.3)
 
 message(glue("Saving Seurat object as {outSeurat}"))
 saveRDS(data, outSeurat)
+
+message(glue("Found {dim(data)[[1]]} genes in {infile}"))
+cat(dim(data)[[1]])
+write.table(dim(data)[[1]], 
+						quote = F, row.names = F, col.names = F,
+						file="tmp/gene_count.csv")
